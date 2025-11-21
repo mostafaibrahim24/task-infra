@@ -16,10 +16,9 @@
         update_cache: yes
 
     - name: Add Docker GPG key
-      ansible.builtin.shell: |
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-      args:
-        warn: false
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
 
     - name: Add Docker apt repo
       apt_repository:

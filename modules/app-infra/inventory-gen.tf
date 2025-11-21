@@ -1,15 +1,8 @@
 resource "local_file" "ansible_inventory" {
   filename = "./inventory.ini"
 
-  content = <<EOF
-[all]
-${aws_instance.frontend.public_ip}
-${aws_instance.backend.public_ip}
-
-[frontend]
-${aws_instance.frontend.public_ip}
-
-[backend]
-${aws_instance.backend.public_ip}
-EOF
+  content = templatefile("${path.module}/inventory.tpl", {
+    backend_ip  = aws_instance.backend.public_ip
+    frontend_ip = aws_instance.frontend.public_ip
+  })
 }
