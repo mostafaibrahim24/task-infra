@@ -1,0 +1,39 @@
+- name: Install Docker on all machines
+  hosts: all
+  become: yes
+  vars:
+    docker_packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name: "{{ docker_packages }}"
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      ansible.builtin.shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+      args:
+        warn: false
+
+    - name: Add Docker apt repo
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Ensure docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
