@@ -1,3 +1,4 @@
+# Generate a local Ansible inventory file dynamically
 resource "local_file" "ansible_inventory" {
   filename = "./inventory.ini"
 

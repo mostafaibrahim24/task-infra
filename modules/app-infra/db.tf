@@ -1,4 +1,5 @@
-
+# Create a subnet group specifically for RDS.
+# This tells AWS which private subnets the RDS instance can live in
 resource "aws_db_subnet_group" "rds" {
   name       = "${var.infra_env}-rds-subnet-group"
   subnet_ids = aws_subnet.private[*].id
@@ -10,7 +11,7 @@ resource "aws_db_subnet_group" "rds" {
 
 resource "aws_db_instance" "mysql" {
   identifier             = "${var.infra_env}-mysql-8"
-  allocated_storage      = 20
+  allocated_storage      = 20 # 20GB
   engine                 = "mysql"
   engine_version         = "8.0"
   instance_class         = var.rds_instance_class
@@ -20,7 +21,7 @@ resource "aws_db_instance" "mysql" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
 
   publicly_accessible = false
-  multi_az            = false
+  multi_az            = false #single-az
   skip_final_snapshot = true
   apply_immediately   = true
 

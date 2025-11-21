@@ -1,20 +1,22 @@
-#generated key pair
+# Generate a new SSH key pair for EC2 access
 resource "tls_private_key" "ssh" {
   algorithm = "RSA"
   rsa_bits  = 2048
 }
-
+# Upload the public key to AWS for EC2 instances
 resource "aws_key_pair" "app_kp" {
   key_name   = "${var.infra_env}-app-kp"
   public_key = tls_private_key.ssh.public_key_openssh
 }
 
+# Save the private key locally
 resource "local_file" "private_key" {
   content         = tls_private_key.ssh.private_key_pem
   filename        = "./appinstances-kp.pem"
   file_permission = "0400"
 }
 
+# Security group for EC2 instances (frontend & backend)
 resource "aws_security_group" "ec2_sg" {
   name        = "${var.infra_env}-ec2-sg"
   description = "Allow SSH + HTTP"
@@ -108,17 +110,19 @@ resource "aws_instance" "backend" {
   }
 }
 
-
+# SNS topic for CPU alerts
 resource "aws_sns_topic" "cpu_alerts" {
   name = "${var.infra_env}-instances-cpu-alerts"
 }
 
+# Subscribe an email to CPU alerts
 resource "aws_sns_topic_subscription" "email_sub" {
   topic_arn = aws_sns_topic.cpu_alerts.arn
   protocol  = "email"
   endpoint  = var.alert_email  # your email here
 }
 
+# CloudWatch alarm for CPU usage
 resource "aws_cloudwatch_metric_alarm" "frontend_cpu" {
   alarm_name          = "${var.infra_env}-frontend-cpu"
   comparison_operator = "GreaterThanThreshold"
@@ -152,6 +156,8 @@ resource "aws_cloudwatch_metric_alarm" "backend_cpu" {
     InstanceId = aws_instance.backend.id
   }
 }
+
+# Fetch the latest Ubuntu 22.04 AMI
 
 data "aws_ami" "ubuntu_22_04" {
   most_recent = true
